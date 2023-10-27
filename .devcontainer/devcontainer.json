@@ -1,0 +1,7 @@
+{
+	"name": "Foundry",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
+	"features": {
+		"ghcr.io/nlordell/features/foundry:0": {}
+	}
+}
