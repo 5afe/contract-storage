@@ -2,5 +2,5 @@
 pragma solidity ^0.8.21;
 
 interface IContractStorage {
-    function contractStorageValue() external view returns (uint256 value);
+    function contractStorageValue() external view returns (uint256 value, uint256 sequence);
 }

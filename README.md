@@ -1,66 +1,19 @@
-## Foundry
+# Contract Storage
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This repository implements a contract-based storage mechanism. Specifically, it
+uses `CREATE2` to deploy contracts to well known addresses whose code contains
+the actual stored values.
 
-Foundry consists of:
+This makes use of two things:
+- `CREATE2` to deploy contracts to deterministic addresses. Additionally the
+  value being stored per contract is read using `SLOAD` in the caller, meaning
+  that the storage contract ends up at the same address regardless of the
+  stored value.
+- `SELFDESTRUCT` to remove a contract code. Critically, this allows a new
+  contract to be deployed at the same address using `CREATE2` which a
+  potentially different stored value.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Stability
 
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+In general **it it not recommended to use this module**. `SELFDESTRUCT` has been
+officially deprecated, and this code relies on it to updating values.

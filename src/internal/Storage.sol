@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity ^0.8.21;
 
-import {IContractStorage} from "../interfaces/IContractStorage.sol";
+import {IContractStorage} from "./IContractStorage.sol";
 
 contract Storage {
     address private immutable CONTEXT;
     uint256 private immutable VALUE;
+    uint256 private immutable SEQUENCE;
 
     constructor() {
         CONTEXT = msg.sender;
-        VALUE = IContractStorage(msg.sender).contractStorageValue();
+
+        (uint256 value, uint256 sequence) = IContractStorage(msg.sender).contractStorageValue();
+        VALUE = value;
+        SEQUENCE = sequence;
     }
 
     function reset() external {
@@ -19,9 +23,11 @@ contract Storage {
 
     fallback() external {
         uint256 value = VALUE;
+        uint256 sequence = SEQUENCE;
         assembly ("memory-safe") {
             mstore(0, value)
-            return(0, 32)
+            mstore(32, sequence)
+            return(0, 64)
         }
     }
 }
