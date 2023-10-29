@@ -13,6 +13,40 @@ This makes use of two things:
   contract to be deployed at the same address using `CREATE2` which a
   potentially different stored value.
 
+This repository provides a `ContractStorage` abstract class with `cload`,
+`cstore` functions (analogous to `{m,s,t}{load,store}` op-codes) for reading and
+writing to and from contract storage. It comes in two flavours: `Slot` and
+`DynamicSlot`.
+
+## `Slot` Storage
+
+The basic kind of contract storage is the `Slot`. It works by deploying a
+contract using `CREATE2` whose address is salted with the slot value. In order
+to change the value, **two** transactions are needed:
+
+1. A first transaction that `creset`s the `Slot`.
+2. A second transaction that `cstore`s the new value.
+
+Unfortunately, both steps cannot be incuded in the same EVM transaction. This is
+because `SELFDESTRUCT` _schedules a contract for deletion, but does not delete
+it right away_. This means that the contract will act as if it has code even
+after `SELFDESTRUCT` is called until the end of the transaction. Namely, this
+prevents:
+
+- Calling `CREATE2` where the code would end on the same address as the
+  `SELFDESTRUCT`-ed contract
+- Reading the value from the contract will return as if it is still set
+
+## `DynamicSlot` Storage
+
+This is a system with a "`Slot` queue" which allows for values to be updated
+within a transaction. It allows specifying an arrity, or the maximum number of
+updates that the `DynamicSlot` can do within a given EVM transaction (because
+of the same `SELFDESTRUCT` limitations that exist for `Slot`).
+
+This does not work in ERC-4337 `validateUserOp` calls, as it potentially reads
+from contracts with empty code (the empty `Slot`s in the queue).
+
 ## Stability
 
 In general **it it not recommended to use this module**. `SELFDESTRUCT` has been
